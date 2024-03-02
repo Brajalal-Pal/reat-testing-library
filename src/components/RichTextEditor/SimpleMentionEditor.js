@@ -7,6 +7,7 @@ import draftToHtml from "draftjs-to-html";
 import Editor, { createEditorStateWithText } from "@draft-js-plugins/editor";
 import createMentionPlugin, { defaultSuggestionsFilter } from "@draft-js-plugins/mention";
 import createToolbarPlugin, { Separator } from "@draft-js-plugins/static-toolbar";
+import createTextAlignmentPlugin from "@draft-js-plugins/text-alignment";
 import {
   ItalicButton,
   BoldButton,
@@ -20,7 +21,9 @@ import {
   BlockquoteButton,
   CodeBlockButton,
 } from "@draft-js-plugins/buttons";
+import createHashtagPlugin from "@draft-js-plugins/hashtag";
 
+import "@draft-js-plugins/hashtag/lib/plugin.css";
 import "@draft-js-plugins/mention/lib/plugin.css";
 import "@draft-js-plugins/static-toolbar/lib/plugin.css";
 
@@ -42,17 +45,23 @@ const SimpleMentionEditor = (props) => {
   const [open, setOpen] = useState(true);
   const [suggestions, setSuggestions] = useState(mentions);
 
-  const { MentionSuggestions, plugins, Toolbar } = useMemo(() => {
+  const { MentionSuggestions, plugins, Toolbar, TextAlignment } = useMemo(() => {
+    const hashtagPlugin = createHashtagPlugin();
+
+    const textAlignmentPlugin = createTextAlignmentPlugin();
+    const { TextAlignment } = textAlignmentPlugin;
+
+    // eslint-disable-next-line no-shadow
     const mentionPlugin = createMentionPlugin();
+    const { MentionSuggestions } = mentionPlugin;
+
     const toolbarPlugin = createToolbarPlugin();
     const { Toolbar } = toolbarPlugin;
 
     // eslint-disable-next-line no-shadow
-    const { MentionSuggestions } = mentionPlugin;
+    const plugins = [mentionPlugin, toolbarPlugin, textAlignmentPlugin, hashtagPlugin];
 
-    // eslint-disable-next-line no-shadow
-    const plugins = [mentionPlugin, toolbarPlugin];
-    return { plugins, MentionSuggestions, Toolbar };
+    return { plugins, MentionSuggestions, Toolbar, TextAlignment };
   }, []);
 
   const onOpenChange = useCallback((_open) => {
@@ -101,23 +110,25 @@ const SimpleMentionEditor = (props) => {
             console.log("onAddMention", mentionData);
           }}
         />
+        <div className={editorStyles.toolbar}>
+          <Toolbar>
+            {(externalProps) => (
+              <React.Fragment>
+                <BoldButton {...externalProps} />
+                <ItalicButton {...externalProps} />
+                <UnderlineButton {...externalProps} />
+                <CodeButton {...externalProps} />
+                <Separator {...externalProps} />
 
-        <Toolbar>
-          {(externalProps) => (
-            <React.Fragment>
-              <BoldButton {...externalProps} />
-              <ItalicButton {...externalProps} />
-              <UnderlineButton {...externalProps} />
-              <CodeButton {...externalProps} />
-              <Separator {...externalProps} />
-              {/* <HeadlinesButton {...externalProps} /> */}
-              <UnorderedListButton {...externalProps} />
-              <OrderedListButton {...externalProps} />
-              <BlockquoteButton {...externalProps} />
-              <CodeBlockButton {...externalProps} />
-            </React.Fragment>
-          )}
-        </Toolbar>
+                <TextAlignment {...externalProps} />
+                <UnorderedListButton {...externalProps} />
+                <OrderedListButton {...externalProps} />
+                <BlockquoteButton {...externalProps} />
+                <CodeBlockButton {...externalProps} />
+              </React.Fragment>
+            )}
+          </Toolbar>
+        </div>
       </div>
       <div>
         <button onClick={onSaveChangeHandler}>Save</button>
