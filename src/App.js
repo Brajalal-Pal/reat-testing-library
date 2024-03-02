@@ -1,21 +1,24 @@
-import { useState } from "react";
-import UserForm from "./components/UserForm";
-import UserList from "./components/UserList";
+import React, { useState } from "react";
+// import TextEditor from "./components/RichTextEditor/TextEditor";
+import SimpleMentionEditor from "./components/RichTextEditor/SimpleMentionEditor";
 
 function App() {
-  const [users, setUsers] = useState([]);
-
-  const onUserAdd = (user) => {
-    setUsers([...users, user]);
-  };
-
-  console.log(users);
+  const [contents, setContents] = useState({});
 
   return (
-    <div style={{ width: "450px" }}>
-      <UserForm onUserAdd={onUserAdd} />
-      <hr />
-      <UserList users={users} />
+    <div>
+      <h1>Rich Text Editor</h1>
+      <SimpleMentionEditor setContents={setContents} />
+
+      <h2>Contents</h2>
+      <div dangerouslySetInnerHTML={{ __html: contents?.markup }}></div>
+
+      <h2>Users</h2>
+      <ul>
+        {contents?.mentionedUsers?.map((user) => (
+          <li key={user.id}>{user.name}</li>
+        ))}
+      </ul>
     </div>
   );
 }
